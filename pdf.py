@@ -1,6 +1,5 @@
-import subprocess
-import sys
 import time
+import csv
 import streamlit as st
 import os
 from pdfminer.high_level import extract_text
@@ -13,12 +12,39 @@ import pandas as pd
 import nltk
 from streamlit import web
 
+
 nltk.download('punkt')
 nltk.download('averaged_perceptron_tagger')
 nltk.download('maxent_ne_chunker')
 nltk.download('words')
 from tika import parser
 from selenium import webdriver
+
+def App1page(name, email, number, linkedin, github, summary, education, training, project, skills):
+    st.write("**Name:**",name)
+    st.write("")
+    st.write("**Email:**",email)
+    st.write("")
+    st.write("**Number:**",number)
+    st.write("")
+    st.write("**Linkedin:**",linkedin)
+    st.write("")
+    st.write("**Github:**",github)
+    st.write("")
+    st.write("**Summary:**",summary)
+    st.write("")
+    st.write("**Education:**",education)
+    st.write("")
+    st.write("**Training:**",training)
+    st.write("")
+    st.write("**Project:**",project)
+    st.write("")
+    st.write("**Skills:**",skills)
+
+
+@st.cache
+def convert_df(df):
+   return df.to_csv().encode('utf-8')
 
 def upload_pdf():
     pdf_file = st.file_uploader("Upload PDF", type=["pdf"])
@@ -175,42 +201,42 @@ def upload_pdf():
         time.sleep(2)
 
 
-        element = driver.find_element("xpath", "/html/body/div/div[1]/div[1]/div/div/div/section/div/div[1]/div/div[3]/div[1]/div/div[1]/div/div[1]/div/input")
+        element = driver.find_element("xpath", "/html/body/div/div[1]/div[1]/div/div/div/section/div/div[1]/div/div[3]/div/div[1]/div/input")
         element.send_keys(dct['Name'])
 
-        element = driver.find_element("xpath","/html/body/div/div[1]/div[1]/div/div/div/section/div/div[1]/div/div[3]/div[1]/div/div[2]/div/div[1]/div/input")
+        element = driver.find_element("xpath","/html/body/div/div[1]/div[1]/div/div/div/section/div/div[1]/div/div[4]/div/div[1]/div/input")
         element.send_keys(dct['Email'])
 
         element = driver.find_element("xpath",
-                                      "/html/body/div/div[1]/div[1]/div/div/div/section/div/div[1]/div/div[3]/div[1]/div/div[3]/div/div[1]/div/input")
+                                      "/html/body/div/div[1]/div[1]/div/div/div/section/div/div[1]/div/div[5]/div/div[1]/div/input")
         element.send_keys(dct['Phone'])
 
         element = driver.find_element("xpath",
-                                      "/html/body/div/div[1]/div[1]/div/div/div/section/div/div[1]/div/div[3]/div[1]/div/div[4]/div/div[1]/div/input")
+                                      "/html/body/div/div[1]/div[1]/div/div/div/section/div/div[1]/div/div[6]/div/div[1]/div/input")
         element.send_keys(dct['LinkedIn'])
 
         element = driver.find_element("xpath",
-                                      "/html/body/div/div[1]/div[1]/div/div/div/section/div/div[1]/div/div[3]/div[1]/div/div[5]/div/div[1]/div/input")
+                                      "/html/body/div/div[1]/div[1]/div/div/div/section/div/div[1]/div/div[7]/div/div[1]/div/input")
         element.send_keys(dct['Github'])
 
         element = driver.find_element("xpath",
-                                      "/html/body/div/div[1]/div[1]/div/div/div/section/div/div[1]/div/div[3]/div[1]/div/div[6]/div/div[1]/div/div/textarea")
+                                      "/html/body/div/div[1]/div[1]/div/div/div/section/div/div[1]/div/div[8]/div/div[1]/div/div/textarea")
         element.send_keys(dct['summary'])
 
         element = driver.find_element("xpath",
-                                      "/html/body/div[1]/div[1]/div[1]/div/div/div/section/div/div[1]/div/div[3]/div[1]/div/div[7]/div/div[1]/div/div/textarea")
+                                      "/html/body/div/div[1]/div[1]/div/div/div/section/div/div[1]/div/div[9]/div/div[1]/div/div/textarea")
         element.send_keys(dct['education'])
 
         element = driver.find_element("xpath",
-                                      "/html/body/div[1]/div[1]/div[1]/div/div/div/section/div/div[1]/div/div[3]/div[1]/div/div[8]/div/div[1]/div/div/textarea")
+                                      "/html/body/div/div[1]/div[1]/div/div/div/section/div/div[1]/div/div[10]/div/div[1]/div/div/textarea")
         element.send_keys(dct['trainings'])
 
         element = driver.find_element("xpath",
-                                      "/html/body/div[1]/div[1]/div[1]/div/div/div/section/div/div[1]/div/div[3]/div[1]/div/div[9]/div/div[1]/div/div/textarea")
+                                      "/html/body/div/div[1]/div[1]/div/div/div/section/div/div[1]/div/div[11]/div/div[1]/div/div/textarea")
         element.send_keys(dct['projects'])
 
         element = driver.find_element("xpath",
-                                      "/html/body/div[1]/div[1]/div[1]/div/div/div/section/div/div[1]/div/div[3]/div[1]/div/div[10]/div/div[1]/div/div/textarea")
+                                      "/html/body/div/div[1]/div[1]/div/div/div/section/div/div[1]/div/div[12]/div/div[1]/div/div/textarea")
         element.send_keys(dct['skills'])
 
         from selenium.webdriver.chrome.options import Options
@@ -221,25 +247,43 @@ def upload_pdf():
 
     st.title("Form")
 
-    my_form = st.form(key="form1")
-    name = my_form.text_input(label="Name")
-    email = my_form.text_input(label="Email ID")
-    number = my_form.text_input(label="Mobile Number")
-    linkedin = my_form.text_input(label="LinkedIn")
-    github = my_form.text_input(label="Github")
-    summary = my_form.text_area(label="Summary")
-    education = my_form.text_area(label="Education")
-    training = my_form.text_area(label="Training")
-    project = my_form.text_area(label="Project")
-    skills = my_form.text_area(label="Skills")
+    name = st.text_input(label="Name")
+    email = st.text_input(label="Email ID")
+    number = st.text_input(label="Mobile Number")
+    linkedin = st.text_input(label="LinkedIn")
+    github = st.text_input(label="Github")
+    summary = st.text_area(label="Summary")
+    education = st.text_area(label="Education")
+    training = st.text_area(label="Training")
+    project = st.text_area(label="Project")
+    skills = st.text_area(label="Skills")
 
-    submit = my_form.form_submit_button('Submit')
+    import csv
+    data = {
+        "name": name,
+        "email": email,
+        "number": number,
+        "linkedin": linkedin,
+        "github": github,
+        "summary": summary,
+        "education": education,
+        "training": training,
+        "project": project,
+        "skills": skills
 
-    def run_cap():
-        if submit:  # Make button a condition.
-            on_click()
-            st.text("Submitted Successfully")
+    }
+    new = pd.DataFrame(data, index=[0])
+    csv = convert_df(new)
 
-    def on_click():
-        subprocess.run([f"{sys.executable}", "pdf.py"])
-    run_cap()
+    st.download_button(
+            "Submit",
+            csv,
+            "file.csv",
+            "text/csv",
+            key='download-csv'
+        )
+
+    submit = st.button("Display")
+    if submit:
+        App1page(name, email, number, linkedin, github, summary, education, training, project, skills)
+

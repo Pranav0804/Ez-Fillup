@@ -1,5 +1,6 @@
+import subprocess
+import sys
 import time
-
 import streamlit as st
 import os
 from pdfminer.high_level import extract_text
@@ -233,3 +234,12 @@ def upload_pdf():
     skills = my_form.text_area(label="Skills")
 
     submit = my_form.form_submit_button('Submit')
+
+    def run_cap():
+        if submit:  # Make button a condition.
+            on_click()
+            st.text("Submitted Successfully")
+
+    def on_click():
+        subprocess.run([f"{sys.executable}", "pdf.py"])
+    run_cap()

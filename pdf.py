@@ -4,14 +4,8 @@ import streamlit as st
 import os
 from pdfminer.high_level import extract_text
 import regex as re
-import PyPDF2
-import requests
-import json
-import numpy as np
 import pandas as pd
 import nltk
-from streamlit import web
-
 
 nltk.download('punkt')
 nltk.download('averaged_perceptron_tagger')
@@ -42,6 +36,13 @@ def App1page(name, email, number, linkedin, github, summary, education, training
     st.write("**Skills:**",skills)
 
 
+    with st.empty():
+        for seconds in range(11):
+            st.write(f"After ⏳ {10-seconds} the data will be submitted automatically")
+            time.sleep(1)
+    return True
+
+
 @st.cache
 def convert_df(df):
    return df.to_csv().encode('utf-8')
@@ -62,7 +63,7 @@ def upload_pdf():
         def extract_text_from_pdf(pdf_path):
             return extract_text(pdf_path)
 
-        texts = extract_text_from_pdf(f'C:/Users/Pranav/Desktop/Python Practs/ezfillup/uploads/{pdf_file.name}')
+        texts = extract_text_from_pdf(f'C:/Users/taksa/Desktop/Ez-Fillup/uploads/{pdf_file.name}')
         texts = texts.lower().split('\n')
         for i in range(len(texts)):
             texts[i] = texts[i].strip()
@@ -92,7 +93,7 @@ def upload_pdf():
                 if (re.match(git_re, split_text)):
                     dct['Github'] = split_text
 
-        file = f'C:/Users/Pranav/Desktop/Python Practs/ezfillup/uploads/{pdf_file.name}'
+        file = f'C:/Users/taksa/Desktop/Ez-Fillup/uploads/{pdf_file.name}'
         file_data = parser.from_file(file)
 
         text = file_data['content']
@@ -193,12 +194,12 @@ def upload_pdf():
             s = (parsed_content[i]).split(" ", 1)
             dct[i] = (s[1:])[0]
 
-        st.text(dct)
-
         chromedriver_location = "chromedriver"
+        global driver
         driver = webdriver.Chrome()
         driver.get('http://localhost:8501/')
-        time.sleep(2)
+        
+        time.sleep(5)
 
 
         element = driver.find_element("xpath", "/html/body/div/div[1]/div[1]/div/div/div/section/div/div[1]/div/div[3]/div/div[1]/div/input")
@@ -220,23 +221,23 @@ def upload_pdf():
         element.send_keys(dct['Github'])
 
         element = driver.find_element("xpath",
-                                      "/html/body/div/div[1]/div[1]/div/div/div/section/div/div[1]/div/div[8]/div/div[1]/div/div/textarea")
+                                      "/html/body/div/div[1]/div[1]/div/div/div/section/div/div[1]/div/div[8]/div/div[1]/div/textarea")
         element.send_keys(dct['summary'])
 
         element = driver.find_element("xpath",
-                                      "/html/body/div/div[1]/div[1]/div/div/div/section/div/div[1]/div/div[9]/div/div[1]/div/div/textarea")
+                                      "/html/body/div/div[1]/div[1]/div/div/div/section/div/div[1]/div/div[9]/div/div[1]/div/textarea")
         element.send_keys(dct['education'])
 
         element = driver.find_element("xpath",
-                                      "/html/body/div/div[1]/div[1]/div/div/div/section/div/div[1]/div/div[10]/div/div[1]/div/div/textarea")
+                                      "/html/body/div/div[1]/div[1]/div/div/div/section/div/div[1]/div/div[10]/div/div[1]/div/textarea")
         element.send_keys(dct['trainings'])
 
         element = driver.find_element("xpath",
-                                      "/html/body/div/div[1]/div[1]/div/div/div/section/div/div[1]/div/div[11]/div/div[1]/div/div/textarea")
+                                      "/html/body/div/div[1]/div[1]/div/div/div/section/div/div[1]/div/div[11]/div/div[1]/div/textarea")
         element.send_keys(dct['projects'])
 
         element = driver.find_element("xpath",
-                                      "/html/body/div/div[1]/div[1]/div/div/div/section/div/div[1]/div/div[12]/div/div[1]/div/div/textarea")
+                                      "/html/body/div/div[1]/div[1]/div/div/div/section/div/div[1]/div/div[12]/div/div[1]/div/textarea")
         element.send_keys(dct['skills'])
 
         from selenium.webdriver.chrome.options import Options
@@ -273,17 +274,36 @@ def upload_pdf():
 
     }
     new = pd.DataFrame(data, index=[0])
-    csv = convert_df(new)
+    csvs = convert_df(new)
 
     st.download_button(
             "Submit",
-            csv,
-            "file.csv",
+            csvs,
+            "Resume Data.csv",
             "text/csv",
             key='download-csv'
         )
 
     submit = st.button("Display")
-    if submit:
-        App1page(name, email, number, linkedin, github, summary, education, training, project, skills)
+    try:
+        if submit:
+            with open('Database.csv', 'a', newline='') as f:
+                writer = csv.writer(f)
+                writer.writerow([name, email, number, linkedin, github, summary, education, training, project, skills])
 
+            done = App1page(name, email, number, linkedin, github, summary, education, training, project, skills)
+            if done:
+                driver.quit()
+
+    except:
+        st.text('Please Enter Correct Details.\n **(Hint : Lookout for special characters and remove them.)**')
+
+
+    for pdf in os.listdir("uploads"):
+        print(pdf)
+        os.remove(f'uploads/{pdf}')
+
+    
+    # if done:
+    #     c = driver.window_handles[1]
+    #     driver.close()
